@@ -160,3 +160,34 @@
 .status-changing {
   animation: statusChange 0.3s ease;
 }
+
+/* Добавить эти стили в TechnologyCard.css */
+
+.card-header-content {
+  flex: 1;
+}
+
+.card-category {
+  margin: 8px 0 12px 0;
+}
+
+.category-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.category-icon {
+  font-size: 14px;
+}
+
+.category-label {
+  font-size: 11px;
+}

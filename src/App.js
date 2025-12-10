@@ -1,104 +1,37 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import './App.css';
+import useTechnologies from './components/useTechnologies';
+import ProgressBar from './components/ProgressBar';
 import TechnologyCard from './components/TechnologyCard';
-import ProgressHeader from './components/ProgressHeader';
+import TechnologyNotes from './components/TechnologyNotes';
 import QuickActions from './components/QuickActions';
 import FilterButtons from './components/FilterButtons';
-import TechnologyNotes from './components/TechnologyNotes';
+import Modal from './components/Modal';
 
 function App() {
-  // Начальные данные
-  const initialTechnologies = [
-    { id: 1, title: 'React Components', description: 'Изучение базовых компонентов React и их жизненного цикла', status: 'not-started', notes: '' },
-    { id: 2, title: 'JSX Syntax', description: 'Освоение синтаксиса JSX и его отличий от HTML', status: 'not-started', notes: '' },
-    { id: 3, title: 'State Management', description: 'Работа с состоянием компонентов и хуками', status: 'not-started', notes: '' },
-    { id: 4, title: 'React Router', description: 'Настройка маршрутизации в React приложении', status: 'not-started', notes: '' },
-    { id: 5, title: 'Context API', description: 'Использование Context для глобального состояния', status: 'not-started', notes: '' },
-    { id: 6, title: 'Hooks', description: 'Изучение всех встроенных хуков React', status: 'not-started', notes: '' },
-    { id: 7, title: 'Component Lifecycle', description: 'Понимание жизненного цикла компонентов', status: 'not-started', notes: '' },
-    { id: 8, title: 'React Testing', description: 'Тестирование React компонентов', status: 'not-started', notes: '' },
-    { id: 9, title: 'Performance Optimization', description: 'Оптимизация производительности React приложений', status: 'not-started', notes: '' },
-    { id: 10, title: 'Server Side Rendering', description: 'Изучение SSR с Next.js', status: 'not-started', notes: '' }
-  ];
+  const {
+    technologies,
+    toggleStatus,
+    updateNotes,
+    markAllAsCompleted,
+    resetAllStatuses,
+    randomNextTechnology,
+    resetAllData,
+    getStatistics
+  } = useTechnologies();
 
-  // Состояние технологий с загрузкой из localStorage
-  const [technologies, setTechnologies] = useState(() => {
-    const saved = localStorage.getItem('techTrackerData');
-    return saved ? JSON.parse(saved) : initialTechnologies;
-  });
-
-  // Состояние для поискового запроса
   const [searchQuery, setSearchQuery] = useState('');
-  
-  // Состояние для активного фильтра
   const [activeFilter, setActiveFilter] = useState('all');
+  const [showStatsModal, setShowStatsModal] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [showResetModal, setShowResetModal] = useState(false);
 
-  // Автосохранение в localStorage
-  useEffect(() => {
-    localStorage.setItem('techTrackerData', JSON.stringify(technologies));
-    console.log('📁 Данные сохранены в localStorage:', technologies.length, 'технологий');
-  }, [technologies]);
+  const statistics = getStatistics();
 
-  // Функция для изменения статуса технологии
-  const handleStatusChange = (id) => {
-    setTechnologies(prevTech => 
-      prevTech.map(tech => {
-        if (tech.id === id) {
-          const statusOrder = ['not-started', 'in-progress', 'completed'];
-          const currentIndex = statusOrder.indexOf(tech.status);
-          const nextIndex = (currentIndex + 1) % statusOrder.length;
-          const newStatus = statusOrder[nextIndex];
-          
-          console.log(`🔄 Технология "${tech.title}" изменена на статус: ${newStatus}`);
-          return { ...tech, status: newStatus };
-        }
-        return tech;
-      })
-    );
-  };
-
-  // Функция для изменения заметок
-  const updateTechnologyNotes = (techId, newNotes) => {
-    setTechnologies(prevTech => 
-      prevTech.map(tech => 
-        tech.id === techId ? { ...tech, notes: newNotes } : tech
-      )
-    );
-    console.log(`📝 Заметки обновлены для технологии ID: ${techId}`);
-  };
-
-  // Функция для отметки всех как выполненных
-  const markAllAsCompleted = () => {
-    setTechnologies(prevTech => 
-      prevTech.map(tech => ({ ...tech, status: 'completed' }))
-    );
-    console.log('✅ Все технологии отмечены как выполненные');
-  };
-
-  // Функция для сброса всех статусов
-  const resetAllStatuses = () => {
-    setTechnologies(prevTech => 
-      prevTech.map(tech => ({ ...tech, status: 'not-started' }))
-    );
-    console.log('🔄 Все статусы сброшены');
-  };
-
-  // Функция для случайного выбора следующей технологии
-  const randomNextTechnology = () => {
-    const notStartedTech = technologies.filter(tech => tech.status === 'not-started');
-    if (notStartedTech.length > 0) {
-      const randomTech = notStartedTech[Math.floor(Math.random() * notStartedTech.length)];
-      const randomId = randomTech.id;
-      
-      setTechnologies(prevTech => 
-        prevTech.map(tech => 
-          tech.id === randomId ? { ...tech, status: 'in-progress' } : tech
-        )
-      );
-      
-      console.log(`🎲 Случайно выбрана технология: "${randomTech.title}"`);
-      
-      // Прокрутка к выбранной технологии
+  // Обработчик случайного выбора технологии
+  const handleRandomNext = () => {
+    const randomId = randomNextTechnology();
+    if (randomId) {
       setTimeout(() => {
         const element = document.getElementById(`tech-${randomId}`);
         if (element) {
@@ -110,40 +43,37 @@ function App() {
     }
   };
 
-  // Функция для сброса всех данных
-  const resetAllData = () => {
-    if (window.confirm('Вы уверены, что хотите сбросить все данные? Все заметки и статусы будут удалены.')) {
-      localStorage.removeItem('techTrackerData');
-      setTechnologies(initialTechnologies);
-      setSearchQuery('');
-      setActiveFilter('all');
-      console.log('🗑️ Все данные сброшены к начальному состоянию');
-    }
-  };
+  // Экспорт данных
+  const handleExport = () => {
+    const exportData = {
+      metadata: {
+        exportedAt: new Date().toISOString(),
+        version: '1.0',
+        totalTechnologies: statistics.totalCount,
+        progress: statistics.progress
+      },
+      technologies: technologies
+    };
 
-  // Функция для экспорта данных
-  const exportData = () => {
-    const dataStr = JSON.stringify(technologies, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    const exportFileDefaultName = 'tech-tracker-data.json';
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+    const exportFileDefaultName = `tech-tracker-export-${new Date().toISOString().split('T')[0]}.json`;
     
     const linkElement = document.createElement('a');
     linkElement.setAttribute('href', dataUri);
     linkElement.setAttribute('download', exportFileDefaultName);
     linkElement.click();
     
-    console.log('📤 Данные экспортированы в файл');
+    setShowExportModal(true);
   };
 
   // Фильтрация и поиск технологий
   const filteredTechnologies = technologies.filter(tech => {
-    // Применяем поиск
     const matchesSearch = searchQuery === '' || 
       tech.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       tech.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (tech.notes && tech.notes.toLowerCase().includes(searchQuery.toLowerCase()));
     
-    // Применяем фильтр по статусу
     const matchesFilter = activeFilter === 'all' || tech.status === activeFilter;
     
     return matchesSearch && matchesFilter;
@@ -151,14 +81,152 @@ function App() {
 
   return (
     <div className="App">
-      <ProgressHeader technologies={technologies} />
+      {/* Модальные окна */}
+      <Modal
+        isOpen={showStatsModal}
+        onClose={() => setShowStatsModal(false)}
+        title="📊 Детальная статистика"
+        size="medium"
+      >
+        <div className="stats-modal-content">
+          <div className="stats-grid">
+            <div className="stat-card">
+              <div className="stat-value">{statistics.totalCount}</div>
+              <div className="stat-label">Всего технологий</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-value">{statistics.completedCount}</div>
+              <div className="stat-label">Завершено</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-value">{statistics.inProgressCount}</div>
+              <div className="stat-label">В процессе</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-value">{statistics.notStartedCount}</div>
+              <div className="stat-label">Не начато</div>
+            </div>
+          </div>
+
+          <h3>Прогресс по категориям</h3>
+          {Object.entries(statistics.categories).map(([category, data]) => {
+            const categoryProgress = data.total > 0 ? Math.round((data.completed / data.total) * 100) : 0;
+            return (
+              <div key={category} className="category-progress">
+                <div className="category-header">
+                  <span className="category-name">{getCategoryLabel(category)}</span>
+                  <span className="category-stats">
+                    {data.completed}/{data.total} ({categoryProgress}%)
+                  </span>
+                </div>
+                <ProgressBar
+                  progress={categoryProgress}
+                  height={10}
+                  showLabel={false}
+                  showPercentage={false}
+                  color={getCategoryColor(category)}
+                />
+              </div>
+            );
+          })}
+
+          <ProgressBar
+            progress={statistics.progress}
+            label="Общий прогресс"
+            animated={true}
+            height={20}
+            className="progress-bar-success"
+          />
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
+        title="📤 Экспорт данных"
+        size="small"
+      >
+        <div className="export-modal-content">
+          <p>✅ Данные успешно экспортированы!</p>
+          <p>Файл скачан автоматически в формате JSON.</p>
+          <p className="export-hint">
+            Всего экспортировано: <strong>{statistics.totalCount}</strong> технологий
+          </p>
+          <button 
+            className="modal-action-btn"
+            onClick={() => setShowExportModal(false)}
+          >
+            Закрыть
+          </button>
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={showResetModal}
+        onClose={() => setShowResetModal(false)}
+        title="⚠️ Сброс всех данных"
+        size="small"
+      >
+        <div className="reset-modal-content">
+          <p>Вы уверены, что хотите сбросить все данные?</p>
+          <p className="reset-warning">
+            Это действие нельзя отменить! Будут удалены:
+          </p>
+          <ul className="reset-list">
+            <li>Все статусы прогресса</li>
+            <li>Все заметки пользователя</li>
+            <li>Вся статистика изучения</li>
+          </ul>
+          <div className="reset-buttons">
+            <button 
+              className="modal-action-btn danger"
+              onClick={() => {
+                resetAllData();
+                setShowResetModal(false);
+              }}
+            >
+              Да, сбросить всё
+            </button>
+            <button 
+              className="modal-action-btn secondary"
+              onClick={() => setShowResetModal(false)}
+            >
+              Отмена
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Основной контент */}
+      <div className="progress-header-wrapper">
+        <div className="app-container">
+          <header className="app-header">
+            <h1>Персональный трекер освоения технологий</h1>
+            <div className="main-progress">
+              <ProgressBar
+                progress={statistics.progress}
+                label="Общий прогресс"
+                color="#6366f1"
+                animated={true}
+                height={25}
+                showPercentage={true}
+              />
+              <div className="progress-stats-quick">
+                <span>Завершено: {statistics.completedCount}/{statistics.totalCount}</span>
+                <button 
+                  className="stats-btn"
+                  onClick={() => setShowStatsModal(true)}
+                  title="Показать детальную статистику"
+                >
+                  📊 Подробнее
+                </button>
+              </div>
+            </div>
+          </header>
+        </div>
+      </div>
       
       <div className="app-container">
-        <header className="app-header">
-          <h1>Персональный трекер освоения технологий</h1>
-          <p>Данные автоматически сохраняются в вашем браузере</p>
-        </header>
-        
         <div className="control-panel">
           <div className="search-container">
             <div className="search-box">
@@ -189,7 +257,9 @@ function App() {
           <QuickActions 
             onMarkAllCompleted={markAllAsCompleted}
             onResetAll={resetAllStatuses}
-            onRandomNext={randomNextTechnology}
+            onRandomNext={handleRandomNext}
+            onExport={handleExport}
+            onResetData={() => setShowResetModal(true)}
             technologies={technologies}
           />
           
@@ -198,19 +268,10 @@ function App() {
             onFilterChange={setActiveFilter}
             technologies={technologies}
           />
-          
-          <div className="data-management">
-            <button className="data-btn export-btn" onClick={exportData}>
-              📤 Экспорт данных
-            </button>
-            <button className="data-btn reset-btn" onClick={resetAllData}>
-              🗑️ Сбросить все
-            </button>
-          </div>
         </div>
         
         <main className="main-content">
-          <h2>Дорожная карта изучения React</h2>
+          <h2>Дорожная карта изучения технологий</h2>
           <p className="filter-info">
             {searchQuery ? `Результаты поиска: "${searchQuery}"` : 'Все технологии'} | 
             Показано: {filteredTechnologies.length} из {technologies.length} | 
@@ -225,11 +286,12 @@ function App() {
                   title={tech.title}
                   description={tech.description}
                   status={tech.status}
-                  onStatusChange={handleStatusChange}
+                  category={tech.category}
+                  onStatusChange={toggleStatus}
                 />
                 <TechnologyNotes
                   notes={tech.notes}
-                  onNotesChange={updateTechnologyNotes}
+                  onNotesChange={updateNotes}
                   techId={tech.id}
                 />
               </div>
@@ -262,17 +324,18 @@ function App() {
         <footer className="app-footer">
           <div className="storage-info">
             <span className="storage-icon">💾</span>
-            <span>Данные сохраняются автоматически в вашем браузере</span>
-            <span className="storage-hint">(localStorage)</span>
+            <span>Данные сохраняются автоматически с использованием кастомных хуков</span>
           </div>
-          <p className="hint">💡 Кликайте на карточки для изменения статуса, добавляйте заметки к технологиям</p>
+          <p className="hint">
+            💡 Используйте переиспользуемые компоненты: ProgressBar, Modal, кастомные хуки
+          </p>
         </footer>
       </div>
     </div>
   );
 }
 
-// Вспомогательная функция для получения названия фильтра
+// Вспомогательные функции
 const getFilterLabel = (filter) => {
   const labels = {
     'all': 'Все',
@@ -281,6 +344,26 @@ const getFilterLabel = (filter) => {
     'completed': 'Завершенные'
   };
   return labels[filter] || filter;
+};
+
+const getCategoryLabel = (category) => {
+  const labels = {
+    'frontend': 'Фронтенд',
+    'backend': 'Бэкенд',
+    'devops': 'DevOps',
+    'quality': 'Качество кода'
+  };
+  return labels[category] || category;
+};
+
+const getCategoryColor = (category) => {
+  const colors = {
+    'frontend': '#3b82f6',
+    'backend': '#10b981',
+    'devops': '#8b5cf6',
+    'quality': '#f59e0b'
+  };
+  return colors[category] || '#6b7280';
 };
 
 export default App;

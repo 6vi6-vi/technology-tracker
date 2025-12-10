@@ -1,7 +1,7 @@
 import React from 'react';
 import './TechnologyCard.css';
 
-const TechnologyCard = ({ id, title, description, status, onStatusChange }) => {
+const TechnologyCard = ({ id, title, description, status, category, onStatusChange }) => {
   // Функция для обработки клика по карточке
   const handleClick = () => {
     if (onStatusChange) {
@@ -55,14 +55,28 @@ const TechnologyCard = ({ id, title, description, status, onStatusChange }) => {
     }
   };
 
+  // Функция для получения стилей категории
+  const getCategoryStyles = () => {
+    if (!category) return { color: '#6b7280', label: 'Общее', icon: '📁' };
+    
+    const categories = {
+      'frontend': { color: '#3b82f6', label: 'Frontend', icon: '🖥️' },
+      'backend': { color: '#10b981', label: 'Backend', icon: '⚙️' },
+      'devops': { color: '#8b5cf6', label: 'DevOps', icon: '🚀' },
+      'quality': { color: '#f59e0b', label: 'Quality', icon: '🧪' }
+    };
+    
+    return categories[category] || { color: '#6b7280', label: category, icon: '📁' };
+  };
+
   const statusStyles = getStatusStyles();
+  const categoryStyles = getCategoryStyles();
   const nextStatus = getNextStatus(status);
   const nextStatusText = getNextStatus(status) === 'in-progress' ? 'В процессе' : 
                          getNextStatus(status) === 'completed' ? 'Завершено' : 'Не начато';
 
   return (
     <div 
-      id={`tech-card-${id}`}
       className={`technology-card ${statusStyles.statusClass}`}
       onClick={handleClick}
       style={{ 
@@ -73,13 +87,27 @@ const TechnologyCard = ({ id, title, description, status, onStatusChange }) => {
     >
       <div className="card-header">
         <span className="status-icon">{statusStyles.icon}</span>
-        <div>
+        <div className="card-header-content">
           <h3 className="card-title">{title}</h3>
           <div className="status-indicator">
             <span className="current-status">{statusStyles.statusText}</span>
             <span className="next-status-hint">→ {nextStatusText}</span>
           </div>
         </div>
+      </div>
+      
+      <div className="card-category">
+        <span 
+          className="category-badge"
+          style={{ 
+            backgroundColor: categoryStyles.color + '20', // Добавляем прозрачность
+            color: categoryStyles.color,
+            borderColor: categoryStyles.color
+          }}
+        >
+          <span className="category-icon">{categoryStyles.icon}</span>
+          <span className="category-label">{categoryStyles.label}</span>
+        </span>
       </div>
       
       <div className="card-content">
