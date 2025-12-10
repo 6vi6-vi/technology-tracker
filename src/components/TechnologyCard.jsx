@@ -62,6 +62,7 @@ const TechnologyCard = ({ id, title, description, status, onStatusChange }) => {
 
   return (
     <div 
+      id={`tech-card-${id}`}
       className={`technology-card ${statusStyles.statusClass}`}
       onClick={handleClick}
       style={{ 
