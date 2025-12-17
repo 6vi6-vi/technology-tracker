@@ -1,0 +1,252 @@
+.json-uploader {
+  background-color: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  margin-bottom: 20px;
+}
+
+/* Центрирование заголовка */
+.uploader-header {
+  margin-bottom: 20px;
+  text-align: center; /* Добавлено центрирование */
+}
+
+.uploader-header h3 {
+  margin: 0 0 8px 0;
+  color: #000000;
+  font-size: 15px;
+}
+
+.upload-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Центрирование всей области загрузки файла */
+.file-upload-area {
+  display: flex;
+  flex-direction: column; /* Изменено на колонку для центрирования */
+  align-items: center; /* Центрирование по горизонтали */
+  gap: 15px; /* Увеличено расстояние между элементами */
+}
+
+.file-input {
+  display: none;
+}
+
+.file-input-label {
+  flex: 1;
+}
+
+/* Центрирование области информации о файле */
+.selected-file-info {
+  width: 100%;
+  display: flex;
+  justify-content: center; /* Центрирование по горизонтали */
+}
+
+.file-selected, .no-file-selected {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Центрирование содержимого */
+  gap: 15px;
+  padding: 16px 24px; /* Увеличено padding */
+  border-radius: 8px;
+  width: auto; /* Автоматическая ширина */
+  min-width: 300px; /* Минимальная ширина */
+  transition: all 0.3s ease;
+  text-align: center; /* Центрирование текста */
+}
+
+.file-selected {
+  background-color: #f0f9ff;
+  border: 2px solid #bae6fd;
+}
+
+.no-file-selected {
+  background-color: #f8fafc;
+  border: 2px dashed #cbd5e1;
+}
+
+.file-name, .upload-text {
+  color: #475569;
+  font-size: 14px;
+  font-weight: 500; /* Добавлена жирность */
+}
+
+.clear-btn {
+  padding: 6px 12px;
+  background-color: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.clear-btn:hover {
+  background-color: #f87171;
+  color: white;
+  border-color: #f87171;
+}
+
+.upload-btn, .example-btn {
+  padding: 10px 28px; 
+  font-size: 16px; 
+  font-weight: 600; 
+  font-family: "Jost";
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px; 
+  min-width: 250px; 
+  text-align: center;
+  margin: 0 auto;
+}
+
+.upload-btn {
+  background-color: #6366f1;
+  color: white;
+  border: none;
+}
+
+.upload-btn:hover {
+  background-color: #4f46e5;
+}
+
+.example-btn {
+  background-color: #f0f9ff;
+  color: #0369a1;
+  border: 2px solid #bae6fd;
+}
+
+.example-btn:hover {
+  background-color: #e0f2fe;
+  border-color: #7dd3fc;
+}
+
+.divider {
+  text-align: center;
+  color: #94a3b8;
+  font-size: 14px;
+  position: relative;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 45%;
+  height: 1px;
+  background-color: #e2e8f0;
+}
+
+.divider::before {
+  left: 0;
+}
+
+.divider::after {
+  right: 0;
+}
+
+
+
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  margin-top: 15px;
+  color: #dc2626;
+  font-size: 14px;
+}
+
+.error-icon {
+  font-size: 18px;
+}
+
+.format-info {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.format-info h4 {
+  margin: 0 0 10px 0;
+  color: #1e293b;
+  font-size: 15px;
+}
+
+.json-example {
+  background-color: #1e293b;
+  color: #e2e8f0;
+  padding: 15px;
+  border-radius: 8px;
+  font-size: 12px;
+  overflow-x: auto;
+  margin: 0;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  line-height: 1.5;
+}
+
+.format-requirements {
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #f0f9ff;
+  border-radius: 8px;
+  border-left: 4px solid #3b82f6;
+}
+
+.requirements-list {
+  margin: 10px 0 0 20px;
+  padding: 0;
+}
+
+.requirements-list li {
+  margin-bottom: 8px;
+  color: #475569;
+  font-size: 14px;
+}
+
+.format-example {
+  margin-top: 20px;
+}
+
+.format-example h5 {
+  margin: 0 0 10px 0;
+  color: #1e293b;
+  font-size: 16px;
+}
+
+.format-note {
+  margin-top: 15px;
+  padding: 12px;
+  background-color: #fef3c7;
+  border-radius: 8px;
+  color: #92400e;
+  font-size: 14px;
+  border-left: 4px solid #f59e0b;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .file-selected, .no-file-selected {
+    min-width: 250px;
+    padding: 14px 20px;
+  }
+  
+  .upload-btn {
+    min-width: 180px;
+    font-size: 15px;
+  }
+}

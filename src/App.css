@@ -5,10 +5,18 @@
 }
 
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f8fafc;
+  font-family: "Jost", 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #c0c8e3;
   color: #334155;
   line-height: 1.6;
+}
+
+
+.jost-uniquifier {
+  font-family: "Jost", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: weight;
+  font-style: normal;
 }
 
 .App {
@@ -18,21 +26,19 @@ body {
 .app-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
 }
 
 .app-header {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 30px;
   padding: 20px;
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-  color: white;
-  border-radius: 12px;
+  background: #1c2466;
+  color: #ffffff;
 }
 
 .app-header h1 {
   font-size: 2.5rem;
-  margin-bottom: 10px;
+  margin-bottom: 0px;
 }
 
 .app-header p {
@@ -40,19 +46,95 @@ body {
   opacity: 0.9;
 }
 
+
 .main-content {
   background-color: white;
-  padding: 30px;
+  padding: 25px 20px;
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  margin-bottom: 30px;
+  margin: 0 10px 30px 10px;
 }
 
 .main-content h2 {
-  color: #1e293b;
+  color: #000000;
   margin-bottom: 25px;
   padding-bottom: 10px;
   border-bottom: 2px solid #e2e8f0;
+  width: 100%;
+}
+
+/* Стили для заголовка и кнопок */
+.content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.content-header h2 {
+  margin: 0;
+  color: #1f2937;
+  font-size: 24px;
+}
+
+.content-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.import-btn, .export-btn {
+  padding: 8px 15px;
+  margin-top: 5px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: 'Jost';
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid;
+}
+
+.import-btn {
+  background-color: #6366f1;
+  color: #ffffff;
+  border: none;
+}
+
+.import-btn:hover {
+  background-color: #4f46e5;
+}
+
+.export-btn {
+  background-color: #10b981;
+  color: #ffffff;
+  border: none;
+}
+
+.export-btn:hover {
+  background-color: #079d6b;
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 768px) {
+  .content-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .content-actions {
+    width: 100%;
+  }
+  
+  .import-btn, .export-btn {
+    flex: 1;
+    justify-content: center;
+  }
 }
 
 .technologies-grid {
@@ -64,19 +146,18 @@ body {
 
 .app-footer {
   text-align: center;
-  padding: 20px;
-  color: #64748b;
+  padding: 40px;
+  background: #1c2466;
+  color: #ffffff;
   font-size: 0.9rem;
   border-top: 1px solid #e2e8f0;
 }
-
-/* Добавить эти стили в App.css */
 
 .control-panel {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  margin-bottom: 30px;
+  margin: 0 10px 10px 10px;
 }
 
 .filter-info {
@@ -134,7 +215,13 @@ body {
 }
 
 .highlighted {
-  animation: highlight 2s ease;
+  animation: highlight-pulse 5s ease-in-out;
+  box-shadow: 0 0 0 3px #3b82f6;
+}
+
+@keyframes highlight-pulse {
+  0%, 100% { box-shadow: 0 0 0 3px #3b82f6; }
+  50% { box-shadow: 0 0 0 8px rgba(59, 130, 246, 0.5); }
 }
 
 /* Стили для поиска */
@@ -143,7 +230,7 @@ body {
   padding: 20px;
   border-radius: 12px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
 .search-box {
@@ -165,7 +252,8 @@ body {
   padding: 12px 15px 12px 45px;
   border: 2px solid #e2e8f0;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 16px;
+  font-family: "Jost";
   transition: all 0.3s ease;
 }
 
@@ -237,15 +325,6 @@ body {
   gap: 8px;
 }
 
-.export-btn {
-  border-color: #10b981;
-  color: #10b981;
-}
-
-.export-btn:hover {
-  background-color: #f0fdf4;
-  transform: translateY(-2px);
-}
 
 .reset-btn {
   border-color: #ef4444;
@@ -260,29 +339,6 @@ body {
 /* Обертка для карточки и заметок */
 .tech-card-wrapper {
   margin-bottom: 20px;
-}
-
-/* Информация о хранилище */
-.storage-info {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  justify-content: center;
-  margin-bottom: 10px;
-  padding: 10px;
-  background-color: #f0f9ff;
-  border-radius: 8px;
-  border: 1px solid #bae6fd;
-}
-
-.storage-icon {
-  font-size: 20px;
-}
-
-.storage-hint {
-  font-size: 12px;
-  color: #64748b;
-  font-style: italic;
 }
 
 /* Улучшение для отсутствующих результатов */
@@ -312,6 +368,66 @@ body {
   border-radius: 8px;
 }
 
+/* Стили для модалки сброса данных */
+.reset-modal-content p {
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.reset-warning {
+  color: #dc2626 !important;
+  font-weight: 600;
+  margin-top: 10px !important;
+}
+
+.reset-list {
+  margin: 15px 0 25px 0;
+  padding-left: 20px;
+  color: #4b5563;
+}
+
+.reset-list li {
+  margin-bottom: 8px;
+  padding-left: 5px;
+}
+
+.reset-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 25px;
+}
+
+.reset-buttons .modal-action-btn {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-family: 'Jost';
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.reset-buttons .danger {
+  background-color: #dc2626;
+  color: white;
+  border: none;
+}
+
+.reset-buttons .danger:hover {
+  background-color: #b91c1c;
+}
+
+.reset-buttons .secondary {
+  background-color: #f3f4f6;
+  color: #4b5563;
+  border: 1px solid #d1d5db;
+}
+
+.reset-buttons .secondary:hover {
+  background-color: #e5e7eb;
+}
+
 /* Адаптивность */
 @media (max-width: 768px) {
     .technologies-grid {
@@ -338,4 +454,34 @@ body {
     flex-direction: column;
     align-items: flex-start;
   }
+}
+
+.technology-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.technology-card:hover {
+  transform: translateY(-4px) scale(1.01);
+}
+
+/* Анимация для выделения случайно выбранной карточки */
+@keyframes pulseHighlight {
+  0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+  50% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+}
+
+.highlighted {
+  animation: pulseHighlight 2s ease;
+  border-color: #3b82f6 !important;
+}
+
+/* Улучшенные стили для карточек */
+.tech-card-wrapper {
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
+}
+
+.tech-card-wrapper:hover {
+  transform: translateY(-2px);
 }

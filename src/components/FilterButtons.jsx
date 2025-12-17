@@ -1,4 +1,3 @@
-import React from 'react';
 import './FilterButtons.css';
 
 const FilterButtons = ({ activeFilter, onFilterChange, technologies }) => {
@@ -6,7 +5,7 @@ const FilterButtons = ({ activeFilter, onFilterChange, technologies }) => {
     { id: 'all', label: 'Все', icon: '📋' },
     { id: 'not-started', label: 'Не начатые', icon: '⭕' },
     { id: 'in-progress', label: 'В процессе', icon: '⏳' },
-    { id: 'completed', label: 'Завершенные', icon: '✅' }
+    { id: 'completed', label: 'Завершённые', icon: '✅' }
   ];
 
   // Подсчет количества для каждого фильтра
@@ -28,6 +27,7 @@ const FilterButtons = ({ activeFilter, onFilterChange, technologies }) => {
             <button
               key={filter.id}
               className={`filter-btn ${filter.id} ${isActive ? 'active' : ''}`}
+               data-filter={filter.id}
               onClick={() => onFilterChange(filter.id)}
               disabled={count === 0 && filter.id !== 'all'}
             >

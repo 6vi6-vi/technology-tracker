@@ -1,12 +1,41 @@
-import React from 'react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './TechnologyCard.css';
 
-const TechnologyCard = ({ id, title, description, status, category, onStatusChange }) => {
-  // Функция для обработки клика по карточке
-  const handleClick = () => {
-    if (onStatusChange) {
-      onStatusChange(id);
-    }
+const TechnologyCard = ({ 
+  id, 
+  title, 
+  description, 
+  status, 
+  dueDate,
+  onStatusChange 
+}) => {
+  const navigate = useNavigate();
+  const [isChangingStatus, setIsChangingStatus] = useState(false);
+
+  // Функция для изменения статуса
+  const handleStatusChange = () => {
+  if (!onStatusChange) return;
+  
+  // Меняем статус 
+  onStatusChange(id);
+  
+  // Запускаем анимацию
+  setIsChangingStatus(true);
+  
+  // Останавливаем анимацию 
+  const timer = setTimeout(() => {
+    setIsChangingStatus(false);
+  });
+  
+  // Очищаем таймер при размонтировании компонента
+  return () => clearTimeout(timer);
+};
+
+  // Функция для перехода на страницу деталей
+  const handleViewDetails = (e) => {
+    e.stopPropagation(); // Останавливаем всплытие
+    navigate(`/technology/${id}`);
   };
 
   // Функция для получения следующего статуса
@@ -26,7 +55,9 @@ const TechnologyCard = ({ id, title, description, status, category, onStatusChan
           icon: '✅', 
           bgColor: '#f0fdf4',
           statusText: 'Завершено',
-          statusClass: 'status-completed'
+          statusClass: 'status-completed',
+          textColor: '#065f46',
+          hoverColor: '#d1fae5'
         };
       case 'in-progress':
         return { 
@@ -34,7 +65,9 @@ const TechnologyCard = ({ id, title, description, status, category, onStatusChan
           icon: '⏳', 
           bgColor: '#fffbeb',
           statusText: 'В процессе',
-          statusClass: 'status-in-progress'
+          statusClass: 'status-in-progress',
+          textColor: '#92400e',
+          hoverColor: '#fef3c7'
         };
       case 'not-started':
         return { 
@@ -42,7 +75,9 @@ const TechnologyCard = ({ id, title, description, status, category, onStatusChan
           icon: '⭕', 
           bgColor: '#fef2f2',
           statusText: 'Не начато',
-          statusClass: 'status-not-started'
+          statusClass: 'status-not-started',
+          textColor: '#991b1b',
+          hoverColor: '#fee2e2'
         };
       default:
         return { 
@@ -50,66 +85,84 @@ const TechnologyCard = ({ id, title, description, status, category, onStatusChan
           icon: '❓', 
           bgColor: '#f9fafb',
           statusText: 'Неизвестно',
-          statusClass: 'status-unknown'
+          statusClass: 'status-unknown',
+          textColor: '#4b5563',
+          hoverColor: '#f3f4f6'
         };
     }
   };
 
-  // Функция для получения стилей категории
-  const getCategoryStyles = () => {
-    if (!category) return { color: '#6b7280', label: 'Общее', icon: '📁' };
+
+  // Функция для отображения срока выполнения
+  const renderDueDate = () => {
+    if (!dueDate) {
+      return (
+        <div className="due-date-indicator not-set">
+          <span className="due-date-text">Дедлайн не установлен</span>
+        </div>
+      );
+  }
     
-    const categories = {
-      'frontend': { color: '#3b82f6', label: 'Frontend', icon: '🖥️' },
-      'backend': { color: '#10b981', label: 'Backend', icon: '⚙️' },
-      'devops': { color: '#8b5cf6', label: 'DevOps', icon: '🚀' },
-      'quality': { color: '#f59e0b', label: 'Quality', icon: '🧪' }
-    };
+    const today = new Date();
+    const due = new Date(dueDate);
+    const daysLeft = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
     
-    return categories[category] || { color: '#6b7280', label: category, icon: '📁' };
+    let className = 'due-date-indicator';
+    let text = `До ${due.toLocaleDateString('ru-RU')}`;
+    
+    if (status === 'completed') {
+      className += ' completed';
+      text = `Завершено ${due.toLocaleDateString('ru-RU')}`;
+    } else if (daysLeft < 0) {
+      className += ' overdue';
+      text = `Просрочено ${Math.abs(daysLeft)} д. назад`;
+    } else if (daysLeft === 0) {
+      className += ' upcoming';
+      text = 'Дедлайн сегодня!';
+    } else if (daysLeft <= 5) {
+      className += ' upcoming';
+      text = `${daysLeft} д. до дедлайна`;
+    } else {
+      className += ' normal';
+      text = `${daysLeft} д. до дедлайна`;
+    }
+    
+    return (
+      <div className={className} title={`Дедлайн: ${due.toLocaleDateString('ru-RU')}`}>
+        <span className="due-date-text">{text}</span>
+      </div>
+    );
   };
 
+
   const statusStyles = getStatusStyles();
-  const categoryStyles = getCategoryStyles();
   const nextStatus = getNextStatus(status);
-  const nextStatusText = getNextStatus(status) === 'in-progress' ? 'В процессе' : 
-                         getNextStatus(status) === 'completed' ? 'Завершено' : 'Не начато';
+  const nextStatusText = nextStatus === 'in-progress' ? 'В процессе' : 
+                         nextStatus === 'completed' ? 'Завершено' : 'Не начато';
 
   return (
     <div 
-      className={`technology-card ${statusStyles.statusClass}`}
-      onClick={handleClick}
+      className={`technology-card ${statusStyles.statusClass} ${isChangingStatus ? 'status-changing' : ''}`}
+      onClick={handleStatusChange}
       style={{ 
         borderColor: statusStyles.borderColor,
         backgroundColor: statusStyles.bgColor 
       }}
-      title={`Кликните чтобы изменить статус на "${nextStatusText}"`}
     >
+      
+      
       <div className="card-header">
         <span className="status-icon">{statusStyles.icon}</span>
-        <div className="card-header-content">
+        <div>
           <h3 className="card-title">{title}</h3>
           <div className="status-indicator">
-            <span className="current-status">{statusStyles.statusText}</span>
-            <span className="next-status-hint">→ {nextStatusText}</span>
+            <div className="card-extra-info">
+              {renderDueDate()}
+            </div>
           </div>
         </div>
       </div>
-      
-      <div className="card-category">
-        <span 
-          className="category-badge"
-          style={{ 
-            backgroundColor: categoryStyles.color + '20', // Добавляем прозрачность
-            color: categoryStyles.color,
-            borderColor: categoryStyles.color
-          }}
-        >
-          <span className="category-icon">{categoryStyles.icon}</span>
-          <span className="category-label">{categoryStyles.label}</span>
-        </span>
-      </div>
-      
+
       <div className="card-content">
         <p className="card-description">{description}</p>
       </div>
@@ -119,10 +172,16 @@ const TechnologyCard = ({ id, title, description, status, category, onStatusChan
           <span className={`status-badge ${statusStyles.statusClass}`}>
             {statusStyles.statusText}
           </span>
-          <span className="click-hint">Кликните для смены статуса</span>
         </div>
-        <span className="card-id">ID: {id}</span>
       </div>
+
+      {/* Кнопка просмотра деталей */}
+      <button 
+        className={`details-btn details-btn-${status}`} // Добавляем класс статуса
+        onClick={handleViewDetails}
+      >
+        Детали
+      </button>
     </div>
   );
 };

@@ -4,7 +4,8 @@ import './ProgressBar.css';
 function ProgressBar({ 
   progress,           // Текущее значение прогресса (от 0 до 100)
   label = '',         // Подпись к прогресс-бару
-  color = '#10b981',  // Цвет заполнения
+  color = '#ffffffff',  // Цвет заполнения
+  labelColor = '#374151', // Цвет подписи
   height = 20,        // Высота прогресс-бара
   showPercentage = true, // Показывать ли процент
   animated = false,   // Анимировать ли заполнение
@@ -19,9 +20,10 @@ function ProgressBar({
       {/* Заголовок с лейблом и процентом */}
       {(showLabel && (label || showPercentage)) && (
         <div className="progress-bar-header">
-          {label && <span className="progress-label">{label}</span>}
+          {label && (
+            <span className="progress-label" style={{ color: labelColor }}>{label}</span>)}
           {showPercentage && (
-            <span className="progress-percentage">{normalizedProgress}%</span>
+            <span className="progress-percentage" style={{ color: labelColor }}>{normalizedProgress}%</span>
           )}
         </div>
       )}

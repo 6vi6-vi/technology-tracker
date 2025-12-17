@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 import './App.css';
 import useTechnologies from './components/useTechnologies';
-import ProgressBar from './components/ProgressBar';
+import TechnologyDetail from './components/TechnologyDetail';
+import JsonUploader from './components/JsonUploader';
 import TechnologyCard from './components/TechnologyCard';
-import TechnologyNotes from './components/TechnologyNotes';
+import ProgressBar from './components/ProgressBar';
 import QuickActions from './components/QuickActions';
 import FilterButtons from './components/FilterButtons';
 import Modal from './components/Modal';
@@ -13,18 +15,24 @@ function App() {
     technologies,
     toggleStatus,
     updateNotes,
+    updateDueDate,
+    loadNewData,
     markAllAsCompleted,
     resetAllStatuses,
     randomNextTechnology,
     resetAllData,
-    getStatistics
+    clearAllNotes,
+    clearAllDueDates,
+    getStatistics,
+    exportData
   } = useTechnologies();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
-  const [showStatsModal, setShowStatsModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
   const [showResetModal, setShowResetModal] = useState(false);
+  const navigate = useNavigate();
 
   const statistics = getStatistics();
 
@@ -43,21 +51,19 @@ function App() {
     }
   };
 
-  // Экспорт данных
-  const handleExport = () => {
-    const exportData = {
-      metadata: {
-        exportedAt: new Date().toISOString(),
-        version: '1.0',
-        totalTechnologies: statistics.totalCount,
-        progress: statistics.progress
-      },
-      technologies: technologies
-    };
+  // Обработчик загрузки новой дорожной карты
+  const handleDataLoaded = (newData, roadmapInfo) => {
+    loadNewData(newData, roadmapInfo);
+    setShowImportModal(false);
+    alert(`Дорожная карта "${roadmapInfo.title}" успешно загружена!`);
+  };
 
-    const dataStr = JSON.stringify(exportData, null, 2);
+  // Обработчик экспорта данных
+  const handleExport = () => {
+    const data = exportData();
+    const dataStr = JSON.stringify(data, null, 2);
     const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
-    const exportFileDefaultName = `tech-tracker-export-${new Date().toISOString().split('T')[0]}.json`;
+    const exportFileDefaultName = `tech-tracker-${new Date().toISOString().split('T')[0]}.json`;
     
     const linkElement = document.createElement('a');
     linkElement.setAttribute('href', dataUri);
@@ -83,81 +89,22 @@ function App() {
     <div className="App">
       {/* Модальные окна */}
       <Modal
-        isOpen={showStatsModal}
-        onClose={() => setShowStatsModal(false)}
-        title="📊 Детальная статистика"
-        size="medium"
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        title="Импорт дорожной карты"
+        size="large"
       >
-        <div className="stats-modal-content">
-          <div className="stats-grid">
-            <div className="stat-card">
-              <div className="stat-value">{statistics.totalCount}</div>
-              <div className="stat-label">Всего технологий</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-value">{statistics.completedCount}</div>
-              <div className="stat-label">Завершено</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-value">{statistics.inProgressCount}</div>
-              <div className="stat-label">В процессе</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-value">{statistics.notStartedCount}</div>
-              <div className="stat-label">Не начато</div>
-            </div>
-          </div>
-
-          <h3>Прогресс по категориям</h3>
-          {Object.entries(statistics.categories).map(([category, data]) => {
-            const categoryProgress = data.total > 0 ? Math.round((data.completed / data.total) * 100) : 0;
-            return (
-              <div key={category} className="category-progress">
-                <div className="category-header">
-                  <span className="category-name">{getCategoryLabel(category)}</span>
-                  <span className="category-stats">
-                    {data.completed}/{data.total} ({categoryProgress}%)
-                  </span>
-                </div>
-                <ProgressBar
-                  progress={categoryProgress}
-                  height={10}
-                  showLabel={false}
-                  showPercentage={false}
-                  color={getCategoryColor(category)}
-                />
-              </div>
-            );
-          })}
-
-          <ProgressBar
-            progress={statistics.progress}
-            label="Общий прогресс"
-            animated={true}
-            height={20}
-            className="progress-bar-success"
-          />
-        </div>
+        <JsonUploader onDataLoaded={handleDataLoaded} />
       </Modal>
 
       <Modal
         isOpen={showExportModal}
         onClose={() => setShowExportModal(false)}
-        title="📤 Экспорт данных"
+        title="Экспорт данных"
         size="small"
       >
         <div className="export-modal-content">
-          <p>✅ Данные успешно экспортированы!</p>
-          <p>Файл скачан автоматически в формате JSON.</p>
-          <p className="export-hint">
-            Всего экспортировано: <strong>{statistics.totalCount}</strong> технологий
-          </p>
-          <button 
-            className="modal-action-btn"
-            onClick={() => setShowExportModal(false)}
-          >
-            Закрыть
-          </button>
+          <p>Данные успешно экспортированы!</p>
         </div>
       </Modal>
 
@@ -176,6 +123,7 @@ function App() {
             <li>Все статусы прогресса</li>
             <li>Все заметки пользователя</li>
             <li>Вся статистика изучения</li>
+            <li>Все установленные сроки</li>
           </ul>
           <div className="reset-buttons">
             <button 
@@ -197,173 +145,152 @@ function App() {
         </div>
       </Modal>
 
-      {/* Основной контент */}
-      <div className="progress-header-wrapper">
-        <div className="app-container">
-          <header className="app-header">
-            <h1>Персональный трекер освоения технологий</h1>
-            <div className="main-progress">
-              <ProgressBar
-                progress={statistics.progress}
-                label="Общий прогресс"
-                color="#6366f1"
-                animated={true}
-                height={25}
-                showPercentage={true}
-              />
-              <div className="progress-stats-quick">
-                <span>Завершено: {statistics.completedCount}/{statistics.totalCount}</span>
-                <button 
-                  className="stats-btn"
-                  onClick={() => setShowStatsModal(true)}
-                  title="Показать детальную статистику"
-                >
-                  📊 Подробнее
-                </button>
+      {/* Роутинг */}
+      <Routes>
+        <Route path="/" element={
+          <>
+            {/* Шапка с прогрессом */}
+            <div className="progress-header-wrapper">
+              <div className="app-header">
+                <header className="app-container">
+                  <div className="header-main">
+                    <h1>Трекер освоения технологий</h1>
+                  </div>
+                  <div className="main-progress">
+                    <ProgressBar
+                      progress={statistics.progress}
+                      label="Общий прогресс"
+                      color="#3d8fe8ff"
+                      labelColor='#ffffffff'
+                      animated={true}
+                      height={25}
+                      showPercentage={true}
+                    />
+                  </div>
+                </header>
               </div>
             </div>
-          </header>
-        </div>
-      </div>
-      
-      <div className="app-container">
-        <div className="control-panel">
-          <div className="search-container">
-            <div className="search-box">
-              <span className="search-icon">🔍</span>
-              <input
-                type="text"
-                placeholder="Поиск по названию, описанию или заметкам..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="search-input"
-              />
-              {searchQuery && (
-                <button 
-                  className="clear-search"
-                  onClick={() => setSearchQuery('')}
-                  title="Очистить поиск"
-                >
-                  ✕
-                </button>
-              )}
-            </div>
-            <div className="search-stats">
-              Найдено: <strong>{filteredTechnologies.length}</strong> из {technologies.length} технологий
-              {searchQuery && ` по запросу "${searchQuery}"`}
-            </div>
-          </div>
-          
-          <QuickActions 
-            onMarkAllCompleted={markAllAsCompleted}
-            onResetAll={resetAllStatuses}
-            onRandomNext={handleRandomNext}
-            onExport={handleExport}
-            onResetData={() => setShowResetModal(true)}
-            technologies={technologies}
-          />
-          
-          <FilterButtons 
-            activeFilter={activeFilter}
-            onFilterChange={setActiveFilter}
-            technologies={technologies}
-          />
-        </div>
-        
-        <main className="main-content">
-          <h2>Дорожная карта изучения технологий</h2>
-          <p className="filter-info">
-            {searchQuery ? `Результаты поиска: "${searchQuery}"` : 'Все технологии'} | 
-            Показано: {filteredTechnologies.length} из {technologies.length} | 
-            Фильтр: {getFilterLabel(activeFilter)}
-          </p>
-          
-          <div className="technologies-grid">
-            {filteredTechnologies.map(tech => (
-              <div key={tech.id} id={`tech-${tech.id}`} className="tech-card-wrapper">
-                <TechnologyCard
-                  id={tech.id}
-                  title={tech.title}
-                  description={tech.description}
-                  status={tech.status}
-                  category={tech.category}
-                  onStatusChange={toggleStatus}
-                />
-                <TechnologyNotes
-                  notes={tech.notes}
-                  onNotesChange={updateNotes}
-                  techId={tech.id}
-                />
-              </div>
-            ))}
             
-            {filteredTechnologies.length === 0 && (
-              <div className="no-results">
-                <p>😔 Ничего не найдено</p>
-                <p className="no-results-hint">
-                  {searchQuery 
-                    ? `По запросу "${searchQuery}" не найдено ни одной технологии`
-                    : 'Нет технологий с выбранным статусом'}
-                </p>
-                <div className="no-results-actions">
-                  <button 
-                    className="clear-filter-btn"
-                    onClick={() => {
-                      setSearchQuery('');
-                      setActiveFilter('all');
-                    }}
-                  >
-                    Сбросить поиск и фильтры
-                  </button>
+            {/* Основной контент */}
+            <div className="app-container">
+              <div className="control-panel">
+                {/* Поиск */}
+                <div className="search-container">
+                  <div className="search-box">
+                    <span className="search-icon">🔍</span>
+                    <input
+                      type="text"
+                      placeholder="Поиск по названию, описанию или заметкам..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="search-input"
+                    />
+                    {searchQuery && (
+                      <button 
+                        className="clear-search"
+                        onClick={() => setSearchQuery('')}
+                        title="Очистить поиск"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+                  <div className="search-stats">
+                    Найдено: <strong>{filteredTechnologies.length}</strong> из {technologies.length} технологий
+                    {searchQuery && ` по запросу "${searchQuery}"`}
+                  </div>
                 </div>
+                
+                
+                {/* Фильтры */}
+                <FilterButtons 
+                  activeFilter={activeFilter}
+                  onFilterChange={setActiveFilter}
+                  technologies={technologies}
+                />
               </div>
-            )}
-          </div>
-        </main>
+              
+              {/* Основной контент - карточки */}
+              <main className="main-content">
+                <div className="content-header">
+                  <h2>Дорожная карта изучения</h2>
+                  <div className="content-actions">
+                    <button 
+                      className="import-btn"
+                      onClick={() => setShowImportModal(true)}
+                    >
+                      Импортировать карту
+                    </button>
+                    <button 
+                      className="export-btn"
+                      onClick={handleExport}
+                    >
+                      Экспортировать данные
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="technologies-grid">
+                  {filteredTechnologies.map(tech => (
+                    <div key={tech.id} id={`tech-${tech.id}`} className="tech-card-wrapper">
+                      <TechnologyCard
+                        id={tech.id}
+                        title={tech.title}
+                        description={tech.description}
+                        status={tech.status}
+                        
+                        dueDate={tech.dueDate}
+                        links={tech.links}
+                        onStatusChange={toggleStatus}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </main>
+
+              <div className="control-panel">
+                {/* Быстрые действия */}
+                <QuickActions 
+                  onMarkAllCompleted={markAllAsCompleted}
+                  onResetAll={resetAllStatuses}
+                  onRandomNext={handleRandomNext}
+                  onExport={handleExport}
+                  onImport={() => setShowImportModal(true)}
+                  onResetData={() => setShowResetModal(true)}
+                  onClearNotes={clearAllNotes}
+                  onClearDueDates={clearAllDueDates}
+                  technologies={technologies}
+                />
+              </div>
+            </div>
+
+            {/* Футер */}
+              <footer className="app-footer">
+              </footer>
+          </>
+        } />
         
-        <footer className="app-footer">
-          <div className="storage-info">
-            <span className="storage-icon">💾</span>
-            <span>Данные сохраняются автоматически с использованием кастомных хуков</span>
-          </div>
-          <p className="hint">
-            💡 Используйте переиспользуемые компоненты: ProgressBar, Modal, кастомные хуки
-          </p>
-        </footer>
-      </div>
+        <Route 
+          path="/technology/:id" 
+          element={
+            <TechnologyDetail
+              technologies={technologies}
+              updateTechnology={(id, updates) => {
+                // Обновляем технологию через существующие функции
+                if (updates.notes !== undefined) updateNotes(id, updates.notes);
+                if (updates.dueDate !== undefined) updateDueDate(id, updates.dueDate);
+                if (updates.status !== undefined) {
+                  // Для смены статуса нужно использовать toggleStatus
+                  // Но в TechnologyDetail это обрабатывается отдельно
+                }
+              }}
+              onBack={() => navigate('/')}
+            />
+          } 
+        />
+      </Routes>
     </div>
   );
 }
-
-// Вспомогательные функции
-const getFilterLabel = (filter) => {
-  const labels = {
-    'all': 'Все',
-    'not-started': 'Не начатые',
-    'in-progress': 'В процессе',
-    'completed': 'Завершенные'
-  };
-  return labels[filter] || filter;
-};
-
-const getCategoryLabel = (category) => {
-  const labels = {
-    'frontend': 'Фронтенд',
-    'backend': 'Бэкенд',
-    'devops': 'DevOps',
-    'quality': 'Качество кода'
-  };
-  return labels[category] || category;
-};
-
-const getCategoryColor = (category) => {
-  const colors = {
-    'frontend': '#3b82f6',
-    'backend': '#10b981',
-    'devops': '#8b5cf6',
-    'quality': '#f59e0b'
-  };
-  return colors[category] || '#6b7280';
-};
 
 export default App;
