@@ -47,18 +47,7 @@ const QuickActions = ({
           <span className="action-text">Случайный выбор следующей</span>
           <span className="action-count">{notStartedCount} доступно</span>
         </button>
-        
-        <button 
-          className="action-btn action-danger"
-          onClick={onResetData}
-        >
-          <span className="action-icon">🗑️</span>
-          <span className="action-text">Сбросить все данные</span>
-          <span className="action-count">Осторожно!</span>
-        </button>
       </div>
-      
-     
     </div>
   );
 };
