@@ -65,33 +65,6 @@ const TechnologyNotes = ({ notes, onNotesChange, techId }) => {
                 {localNotes === notes ? '✓ Сохранено' : '… Сохранение…'}
               </span>
             </div>
-            
-            <div className="notes-buttons">
-              <button 
-                className="notes-btn save-btn"
-                onClick={handleSave}
-                disabled={localNotes === notes}
-              >
-                💾 Сохранить
-              </button>
-              <button 
-                className="notes-btn clear-btn"
-                onClick={handleClear}
-                disabled={!localNotes}
-              >
-                🗑️ Очистить
-              </button>
-            </div>
-          </div>
-          
-          <div className="notes-hints">
-            <p className="hint">💡 Используйте заметки для:</p>
-            <ul>
-              <li>Конспекта ключевых моментов</li>
-              <li>Полезных команд и примеров кода</li>
-              <li>Ссылок на документацию или статьи</li>
-              <li>Личных мыслей и идей</li>
-            </ul>
           </div>
         </div>
       )}
